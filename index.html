@@ -1,10 +1,474 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <title>GitHub Actions S3 Deployment</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Neetesh Sahu | DevOps Engineer</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet"/>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    :root {
+      --bg:     #0d1117;
+      --bg2:    #161b22;
+      --bg3:    #1c2128;
+      --border: #30363d;
+      --accent: #58a6ff;
+      --green:  #3fb950;
+      --red:    #f78166;
+      --text:   #e6edf3;
+      --muted:  #8b949e;
+    }
+    body { background:var(--bg); color:var(--text); font-family:'Inter',sans-serif; line-height:1.6; overflow-x:hidden; }
+    ::-webkit-scrollbar{width:5px} ::-webkit-scrollbar-track{background:var(--bg)} ::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px}
+    a{color:inherit;text-decoration:none}
+
+    /* NAV */
+    nav {
+      position:fixed;top:0;left:0;right:0;z-index:200;height:60px;
+      display:flex;align-items:center;justify-content:space-between;padding:0 2rem;
+      background:rgba(13,17,23,0.9);backdrop-filter:blur(12px);
+      border-bottom:1px solid var(--border);
+    }
+    .nav-logo {
+      width:36px;height:36px;border-radius:50%;
+      background:linear-gradient(135deg,var(--accent),#1f6feb);
+      display:flex;align-items:center;justify-content:center;
+      font-family:'JetBrains Mono',monospace;font-size:0.82rem;font-weight:700;color:#fff;
+    }
+    .nav-links{display:flex;gap:0.1rem;list-style:none}
+    .nav-links a{padding:0.38rem 0.75rem;font-size:0.82rem;color:var(--muted);border-radius:6px;transition:background .15s,color .15s}
+    .nav-links a:hover{background:var(--bg2);color:var(--text)}
+    .nav-links a.active{color:var(--accent)}
+    .nav-cta{padding:0.38rem 1rem;background:var(--accent);color:#000;font-size:0.82rem;font-weight:600;border-radius:6px;transition:opacity .15s}
+    .nav-cta:hover{opacity:.85}
+
+    /* HERO */
+    #hero{min-height:100vh;display:flex;flex-direction:column;justify-content:center;padding:80px 2rem 3rem;max-width:900px;margin:0 auto}
+    .hero-badge{display:inline-flex;align-items:center;gap:.5rem;font-family:'JetBrains Mono',monospace;font-size:.75rem;color:var(--green);border:1px solid rgba(63,185,80,.3);padding:.3rem .75rem;border-radius:20px;margin-bottom:1.5rem;animation:fadeUp .5s ease both}
+    .hero-badge::before{content:'●';font-size:.45rem;animation:blink 1.5s infinite}
+    @keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
+    .hero-name{font-size:clamp(2.2rem,5vw,3.8rem);font-weight:700;line-height:1.1;color:var(--text);margin-bottom:.6rem;animation:fadeUp .5s .08s ease both}
+    .hero-sub{font-family:'JetBrains Mono',monospace;font-size:.88rem;color:var(--muted);margin-bottom:.9rem;animation:fadeUp .5s .14s ease both}
+    .hero-desc{font-size:.97rem;color:var(--muted);max-width:580px;margin-bottom:2rem;line-height:1.75;animation:fadeUp .5s .18s ease both}
+    .hero-btns{display:flex;gap:.75rem;flex-wrap:wrap;margin-bottom:3rem;animation:fadeUp .5s .22s ease both}
+    .btn-p{padding:.58rem 1.3rem;background:var(--accent);color:#000;font-size:.84rem;font-weight:600;border-radius:6px;border:none;cursor:pointer;transition:opacity .15s,transform .15s}
+    .btn-p:hover{opacity:.85;transform:translateY(-1px)}
+    .btn-g{padding:.58rem 1.3rem;background:transparent;color:var(--text);font-size:.84rem;border-radius:6px;border:1px solid var(--border);cursor:pointer;transition:border-color .15s,transform .15s}
+    .btn-g:hover{border-color:var(--accent);transform:translateY(-1px)}
+    .hero-stats{display:flex;gap:2.5rem;flex-wrap:wrap;padding-top:2rem;border-top:1px solid var(--border);animation:fadeUp .5s .28s ease both}
+    .stat-val{font-family:'JetBrains Mono',monospace;font-size:1.35rem;font-weight:700;color:var(--text);display:block}
+    .stat-lbl{font-size:.75rem;color:var(--muted)}
+
+    /* SECTIONS */
+    .sec{max-width:900px;margin:0 auto;padding:4rem 2rem;border-top:1px solid var(--border)}
+    .sec-tag{font-family:'JetBrains Mono',monospace;font-size:.7rem;color:var(--accent);letter-spacing:2px;text-transform:uppercase;margin-bottom:.35rem}
+    .sec-title{font-size:1.55rem;font-weight:700;color:var(--text)}
+    .sec-sub{font-size:.85rem;color:var(--muted);margin-top:.3rem;margin-bottom:2rem}
+
+    /* ABOUT */
+    .about-grid{display:grid;grid-template-columns:1fr 1fr;gap:2.5rem}
+    .about-text p{font-size:.9rem;color:var(--muted);line-height:1.8;margin-bottom:.9rem}
+    .about-text p strong{color:var(--accent);font-weight:500}
+    .hi-list{display:flex;flex-direction:column;gap:.7rem}
+    .hi-item{display:flex;align-items:flex-start;gap:.7rem;padding:.85rem 1rem;background:var(--bg2);border:1px solid var(--border);border-radius:8px;transition:border-color .2s}
+    .hi-item:hover{border-color:var(--accent)}
+    .hi-icon{font-size:1rem;flex-shrink:0;margin-top:.1rem}
+    .hi-title{font-size:.83rem;font-weight:600;color:var(--text)}
+    .hi-desc{font-size:.76rem;color:var(--muted);margin-top:.1rem}
+
+    /* GITHUB */
+    .gh-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(255px,1fr));gap:1rem}
+    .repo-card{background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:1.15rem;display:flex;flex-direction:column;gap:.45rem;transition:border-color .2s,transform .2s;cursor:pointer}
+    .repo-card:hover{border-color:var(--accent);transform:translateY(-2px)}
+    .repo-top{display:flex;align-items:center;gap:.5rem}
+    .repo-ico{font-size:.85rem;color:var(--muted)}
+    .repo-name{font-size:.85rem;font-weight:600;color:var(--accent)}
+    .repo-desc{font-size:.77rem;color:var(--muted);line-height:1.55;flex:1}
+    .repo-foot{display:flex;align-items:center;gap:1rem;margin-top:.4rem}
+    .repo-lang{display:flex;align-items:center;gap:.3rem;font-size:.7rem;color:var(--muted)}
+    .lang-dot{width:10px;height:10px;border-radius:50%}
+    .repo-stars{font-size:.7rem;color:var(--muted)}
+    .gh-loading{grid-column:1/-1;text-align:center;font-family:'JetBrains Mono',monospace;font-size:.8rem;color:var(--muted);padding:2.5rem}
+
+    /* LINKEDIN */
+    .li-grid{display:grid;grid-template-columns:1fr 1fr;gap:2.5rem}
+    .li-row{display:flex;align-items:flex-start;gap:.75rem;padding:.65rem 0;border-bottom:1px solid var(--border)}
+    .li-row:last-child{border-bottom:none}
+    .li-key{font-size:.76rem;color:var(--muted);min-width:96px;flex-shrink:0;padding-top:.05rem}
+    .li-val{font-size:.82rem;color:var(--text)}
+    .li-topics{display:flex;flex-wrap:wrap;gap:.45rem;margin-top:1rem}
+    .li-chip{font-family:'JetBrains Mono',monospace;font-size:.68rem;padding:.22rem .6rem;background:rgba(88,166,255,.08);border:1px solid rgba(88,166,255,.2);border-radius:20px;color:var(--accent)}
+    .li-btns{display:flex;gap:.75rem;flex-wrap:wrap;margin-bottom:1rem}
+    .li-tip{font-size:.73rem;color:var(--muted);font-style:italic;margin-top:.5rem}
+
+    /* EXPERIENCE */
+    .exp-item{display:grid;grid-template-columns:130px 1fr;gap:0 2rem;padding:2rem 0;border-bottom:1px solid var(--border)}
+    .exp-item:last-child{border-bottom:none}
+    .exp-date{font-family:'JetBrains Mono',monospace;font-size:.7rem;color:var(--muted);line-height:1.6;padding-top:.15rem}
+    .exp-role{font-size:.97rem;font-weight:600;color:var(--text);margin-bottom:.2rem}
+    .exp-co{font-size:.8rem;color:var(--accent);margin-bottom:.7rem}
+    .exp-pts{list-style:none;display:flex;flex-direction:column;gap:.35rem}
+    .exp-pts li{font-size:.84rem;color:var(--muted);padding-left:.9rem;position:relative}
+    .exp-pts li::before{content:'•';position:absolute;left:0;color:var(--green)}
+
+    /* DEVOPS */
+    .dv-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(235px,1fr));gap:1rem;margin-bottom:2rem}
+    .sk-card{background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:1.15rem;transition:border-color .2s,transform .2s}
+    .sk-card:hover{border-color:var(--accent);transform:translateY(-2px)}
+    .sk-hd{display:flex;align-items:center;gap:.55rem;margin-bottom:.75rem}
+    .sk-ico{font-size:1.05rem}
+    .sk-title{font-size:.82rem;font-weight:600;color:var(--text)}
+    .sk-pills{display:flex;flex-wrap:wrap;gap:.35rem}
+    .sk-pill{font-family:'JetBrains Mono',monospace;font-size:.67rem;padding:.2rem .52rem;background:var(--bg3);border:1px solid var(--border);border-radius:4px;color:var(--muted)}
+    .dv-box{display:grid;grid-template-columns:1fr 1fr;gap:2rem;padding:1.8rem;background:var(--bg2);border:1px solid var(--border);border-radius:8px}
+    .dv-box-title{font-size:.83rem;font-weight:600;color:var(--text);margin-bottom:.65rem}
+    .dv-pts{list-style:none;display:flex;flex-direction:column;gap:.35rem}
+    .dv-pts li{font-size:.82rem;color:var(--muted);padding-left:.9rem;position:relative}
+    .dv-pts li::before{content:'→';position:absolute;left:0;color:var(--accent);font-size:.72rem;top:.08rem}
+    .dv-tags{display:flex;flex-wrap:wrap;gap:.4rem;margin-top:.9rem}
+    .dv-tag{font-family:'JetBrains Mono',monospace;font-size:.67rem;padding:.18rem .55rem;background:rgba(63,185,80,.08);border:1px solid rgba(63,185,80,.25);border-radius:4px;color:var(--green)}
+
+    /* SKILLS */
+    .skills-cols{display:grid;grid-template-columns:repeat(auto-fill,minmax(195px,1fr));gap:1.5rem}
+    .sg-title{font-size:.82rem;font-weight:600;color:var(--text);margin-bottom:.45rem;padding-bottom:.35rem;border-bottom:1px solid var(--border)}
+    .sg-list{list-style:none;display:flex;flex-direction:column;gap:.28rem}
+    .sg-list li{font-size:.79rem;color:var(--muted);padding-left:.75rem;position:relative}
+    .sg-list li::before{content:'▸';position:absolute;left:0;color:var(--accent);font-size:.62rem;top:.15rem}
+
+    /* EDUCATION */
+    .edu-list{display:flex;flex-direction:column;gap:1rem}
+    .edu-card{display:flex;gap:1.1rem;align-items:flex-start;padding:1.1rem 1.2rem;background:var(--bg2);border:1px solid var(--border);border-radius:8px;transition:border-color .2s}
+    .edu-card:hover{border-color:var(--accent)}
+    .edu-emoji{font-size:1.4rem;flex-shrink:0}
+    .edu-deg{font-size:.88rem;font-weight:600;color:var(--text)}
+    .edu-sch{font-size:.8rem;color:var(--accent);margin:.18rem 0}
+    .edu-yr{font-family:'JetBrains Mono',monospace;font-size:.7rem;color:var(--muted)}
+
+    /* CONTACT */
+    .ct-grid{display:grid;grid-template-columns:1fr 1fr;gap:3rem}
+    .ct-title{font-size:.95rem;font-weight:600;color:var(--text);margin-bottom:.35rem}
+    .ct-desc{font-size:.84rem;color:var(--muted);margin-bottom:1.4rem;line-height:1.7}
+    .ct-cards{display:flex;flex-direction:column;gap:.6rem}
+    .ct-card{display:flex;align-items:center;gap:.85rem;padding:.8rem 1rem;background:var(--bg2);border:1px solid var(--border);border-radius:8px;transition:border-color .2s}
+    .ct-card:hover{border-color:var(--accent)}
+    .ct-icon{width:30px;height:30px;border-radius:6px;background:rgba(88,166,255,.1);display:flex;align-items:center;justify-content:center;font-size:.82rem;flex-shrink:0}
+    .ct-lbl{font-size:.68rem;color:var(--muted);display:block}
+    .ct-val{font-size:.8rem;color:var(--text)}
+    .ct-form{display:flex;flex-direction:column;gap:.7rem}
+    .form-row2{display:grid;grid-template-columns:1fr 1fr;gap:.7rem}
+    .f-in,.f-ta{width:100%;padding:.65rem .85rem;background:var(--bg2);border:1px solid var(--border);border-radius:6px;color:var(--text);font-family:'Inter',sans-serif;font-size:.83rem;outline:none;transition:border-color .15s}
+    .f-in:focus,.f-ta:focus{border-color:var(--accent)}
+    .f-ta{min-height:105px;resize:vertical}
+    ::placeholder{color:var(--muted)}
+    .f-status{font-family:'JetBrains Mono',monospace;font-size:.73rem;color:var(--green);display:none;margin-top:.2rem}
+
+    /* FOOTER */
+    footer{border-top:1px solid var(--border);padding:1.4rem 2rem;max-width:900px;margin:0 auto;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:.5rem}
+    footer p{font-size:.76rem;color:var(--muted)}
+    .ft-links{display:flex;gap:1rem}
+    .ft-links a{font-size:.76rem;color:var(--muted);transition:color .15s}
+    .ft-links a:hover{color:var(--accent)}
+
+    @keyframes fadeUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+    .reveal{opacity:0;transform:translateY(20px);transition:opacity .55s ease,transform .55s ease}
+    .reveal.vis{opacity:1;transform:translateY(0)}
+
+    @media(max-width:680px){
+      .nav-links{display:none}
+      .about-grid,.li-grid,.dv-box,.ct-grid{grid-template-columns:1fr}
+      .exp-item{grid-template-columns:1fr}
+      .form-row2{grid-template-columns:1fr}
+      footer{flex-direction:column;text-align:center}
+    }
+  </style>
 </head>
 <body>
-  <h1>Static Website Deployed Using GitHub Actions</h1>
-  <p>Status: LIVE</p>
+
+<!-- NAV -->
+<nav>
+  <a href="#hero" class="nav-logo">NS</a>
+  <ul class="nav-links">
+    <li><a href="#about">About</a></li>
+    <li><a href="#github">Projects</a></li>
+    <li><a href="#linkedin">LinkedIn</a></li>
+    <li><a href="#devops">DevOps</a></li>
+    <li><a href="#experience">Experience</a></li>
+    <li><a href="#skills">Skills</a></li>
+    <li><a href="#contact">Contact</a></li>
+  </ul>
+  <a href="#contact" class="nav-cta">Contact</a>
+</nav>
+
+<!-- HERO -->
+<div id="hero">
+  <div class="hero-badge">DevOps Engineer</div>
+  <h1 class="hero-name">Neetesh Sahu</h1>
+  <p class="hero-sub">AWS • Linux • Docker • CI/CD • Bash</p>
+  <p class="hero-desc">
+    I build and automate cloud infrastructure so teams can deploy confidently and scale reliably.<br/>
+    Open to DevOps / Cloud / Platform Engineer roles.
+  </p>
+  <div class="hero-btns">
+    <a href="#contact" class="btn-p">Contact</a>
+    <a href="https://github.com/neetesh-sahu" target="_blank" class="btn-g">View GitHub</a>
+    <a href="https://www.linkedin.com/in/neetesh-sahu-9b588520a" target="_blank" class="btn-g">LinkedIn</a>
+  </div>
+  <div class="hero-stats">
+    <div><span class="stat-val" id="repo-count">—</span><span class="stat-lbl">GitHub Repos</span></div>
+    <div><span class="stat-val">1</span><span class="stat-lbl">Current Role</span></div>
+    <div><span class="stat-val">3+</span><span class="stat-lbl">Months Experience</span></div>
+    <div><span class="stat-val">5+</span><span class="stat-lbl">AWS Services</span></div>
+  </div>
+</div>
+
+<!-- ABOUT -->
+<section id="about" class="sec reveal">
+  <div class="sec-tag">about</div>
+  <h2 class="sec-title">Professional Summary</h2>
+  <p class="sec-sub">Aspiring AWS DevOps Engineer with hands-on cloud and automation experience.</p>
+  <div class="about-grid">
+    <div class="about-text">
+      <p>I am a <strong>Computer Science Engineering student at BM College, Indore</strong>, currently working as a <strong>DevOps Intern at Vected Technologies Pvt. Ltd.</strong>, gaining hands-on experience in cloud infrastructure and deployment.</p>
+      <p>During my internship and personal projects, I have worked with <strong>AWS services</strong> such as EC2, S3, VPC, and IAM. I have practical experience with <strong>Linux administration</strong>, Bash scripting, networking, and deploying applications on cloud servers.</p>
+      <p>I am passionate about DevOps and cloud technologies and enjoy building <strong>scalable and secure infrastructure</strong>. Currently seeking DevOps Engineer opportunities in Indore, Bangalore, Pune, and Remote roles.</p>
+    </div>
+    <div class="hi-list">
+      <div class="hi-item"><span class="hi-icon">☁️</span><div><div class="hi-title">Cloud Infrastructure</div><div class="hi-desc">AWS EC2, S3, VPC, IAM — provisioning & securing cloud environments</div></div></div>
+      <div class="hi-item"><span class="hi-icon">🐧</span><div><div class="hi-title">Linux & Automation</div><div class="hi-desc">Linux administration, Bash scripting, SSH, server management</div></div></div>
+      <div class="hi-item"><span class="hi-icon">🔄</span><div><div class="hi-title">CI/CD & Git</div><div class="hi-desc">GitHub, GitHub Actions, automated build & deployment pipelines</div></div></div>
+      <div class="hi-item"><span class="hi-icon">🌐</span><div><div class="hi-title">Networking & Nginx</div><div class="hi-desc">TCP/IP, Subnets, Security Groups, NACLs, Nginx web server setup</div></div></div>
+    </div>
+  </div>
+</section>
+
+<!-- GITHUB PROJECTS -->
+<section id="github" class="sec reveal">
+  <div class="sec-tag">projects</div>
+  <h2 class="sec-title">Selected Projects</h2>
+  <p class="sec-sub">A few projects that reflect how I build and operate cloud systems.</p>
+  <div class="gh-grid" id="gh-grid">
+    <div class="gh-loading">⟳ &nbsp;Fetching projects from GitHub…</div>
+  </div>
+</section>
+
+<!-- LINKEDIN -->
+<section id="linkedin" class="sec reveal">
+  <div class="sec-tag">linkedin</div>
+  <h2 class="sec-title">LinkedIn</h2>
+  <p class="sec-sub">Live profile badge — updates directly from LinkedIn.</p>
+  <div class="li-grid">
+    <div>
+      <div class="li-row"><span class="li-key">Role focus</span><span class="li-val">AWS DevOps / Cloud / Platform Engineering</span></div>
+      <div class="li-row"><span class="li-key">Core areas</span><span class="li-val">AWS • Linux • Docker • CI/CD • Bash • Networking</span></div>
+      <div class="li-row"><span class="li-key">Open to</span><span class="li-val">Internship / Entry-level DevOps · Cloud support · Remote</span></div>
+      <div class="li-row"><span class="li-key">Best contact</span><span class="li-val"><a href="mailto:neeteshsahu.cloud@gmail.com" style="color:var(--accent)">neeteshsahu.cloud@gmail.com</a></span></div>
+      <div class="li-topics">
+        <span class="li-chip">AWS</span><span class="li-chip">Linux</span><span class="li-chip">Docker</span>
+        <span class="li-chip">CI/CD</span><span class="li-chip">Bash</span><span class="li-chip">GitHub Actions</span>
+        <span class="li-chip">Nginx</span><span class="li-chip">Networking</span><span class="li-chip">IAM</span><span class="li-chip">VPC</span>
+      </div>
+    </div>
+    <div>
+      <div class="li-btns">
+        <a href="https://www.linkedin.com/in/neetesh-sahu-9b588520a" target="_blank" class="btn-p">Open LinkedIn</a>
+        <a href="#contact" class="btn-g">Message Me</a>
+      </div>
+      <div class="badge-base LI-profile-badge" data-locale="en_US" data-size="medium" data-theme="dark" data-type="VERTICAL" data-vanity="neetesh-sahu-9b588520a" data-version="v1">
+        <a class="badge-base__link LI-simple-link" href="https://www.linkedin.com/in/neetesh-sahu-9b588520a?trk=profile-badge">Neetesh Sahu</a>
+      </div>
+      <p class="li-tip">Tip: If badge doesn't load (ad-blockers), use "Open LinkedIn" above.</p>
+    </div>
+  </div>
+</section>
+
+<!-- EXPERIENCE -->
+<section id="experience" class="sec reveal">
+  <div class="sec-tag">experience</div>
+  <h2 class="sec-title">Professional Experience</h2>
+  <p class="sec-sub">A journey of continuous learning and hands-on engineering practice.</p>
+  <div>
+    <div class="exp-item">
+      <div class="exp-date">January 2026<br/>— Present</div>
+      <div>
+        <div class="exp-role">DevOps Intern</div>
+        <div class="exp-co">Vected Technologies Pvt. Ltd., Indore</div>
+        <ul class="exp-pts">
+          <li>Working hands-on with AWS cloud infrastructure — EC2, S3, VPC, IAM.</li>
+          <li>Managing Linux servers and configuring SSH-based secure access for deployments.</li>
+          <li>Setting up and deploying Nginx web servers for application hosting.</li>
+          <li>Using Git and GitHub for version control and team workflows.</li>
+          <li>Configuring networking and security: Security Groups, NACLs, Subnets.</li>
+          <li>Building scalable and secure cloud infrastructure focused on operational reliability.</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- DEVOPS -->
+<section id="devops" class="sec reveal">
+  <div class="sec-tag">devops</div>
+  <h2 class="sec-title">DevOps &amp; Cloud Expertise</h2>
+  <p class="sec-sub">Modern tools and technologies for cloud infrastructure automation.</p>
+  <div class="dv-grid">
+    <div class="sk-card"><div class="sk-hd"><span class="sk-ico">☁️</span><span class="sk-title">Cloud Platforms</span></div><div class="sk-pills"><span class="sk-pill">AWS</span><span class="sk-pill">EC2</span><span class="sk-pill">S3</span><span class="sk-pill">VPC</span><span class="sk-pill">IAM</span><span class="sk-pill">Security Groups</span><span class="sk-pill">NACL</span></div></div>
+    <div class="sk-card"><div class="sk-hd"><span class="sk-ico">🔄</span><span class="sk-title">CI/CD Pipelines</span></div><div class="sk-pills"><span class="sk-pill">GitHub Actions</span><span class="sk-pill">Git</span><span class="sk-pill">GitHub</span><span class="sk-pill">Automated Deploy</span></div></div>
+    <div class="sk-card"><div class="sk-hd"><span class="sk-ico">🐳</span><span class="sk-title">Containerization</span></div><div class="sk-pills"><span class="sk-pill">Docker</span><span class="sk-pill">Docker Compose</span><span class="sk-pill">Dockerfile</span></div></div>
+    <div class="sk-card"><div class="sk-hd"><span class="sk-ico">🐧</span><span class="sk-title">Linux &amp; Scripting</span></div><div class="sk-pills"><span class="sk-pill">Linux Admin</span><span class="sk-pill">Bash Scripting</span><span class="sk-pill">SSH</span><span class="sk-pill">Shell Automation</span></div></div>
+    <div class="sk-card"><div class="sk-hd"><span class="sk-ico">🌐</span><span class="sk-title">Networking &amp; Web</span></div><div class="sk-pills"><span class="sk-pill">TCP/IP</span><span class="sk-pill">Subnets</span><span class="sk-pill">Nginx</span><span class="sk-pill">DNS</span></div></div>
+    <div class="sk-card"><div class="sk-hd"><span class="sk-ico">🔒</span><span class="sk-title">Security &amp; IAM</span></div><div class="sk-pills"><span class="sk-pill">IAM Policies</span><span class="sk-pill">Least Privilege</span><span class="sk-pill">MFA</span><span class="sk-pill">Secure Keys</span></div></div>
+  </div>
+  <div class="dv-box">
+    <div>
+      <div class="dv-box-title">What I deliver</div>
+      <ul class="dv-pts">
+        <li>EC2 + VPC deployments with secure IAM policies and networking.</li>
+        <li>CI/CD pipelines: build → test → deploy automation with GitHub Actions.</li>
+        <li>Containerized workloads using Docker and Docker Compose.</li>
+        <li>Nginx reverse proxy setup for production application hosting.</li>
+      </ul>
+    </div>
+    <div>
+      <div class="dv-box-title">How I work</div>
+      <ul class="dv-pts">
+        <li>Git-based workflows with clear branching and commit conventions.</li>
+        <li>Least-privilege IAM and secrets — never hard-coded in source.</li>
+        <li>Bash scripts for repeatable, idempotent automation tasks.</li>
+        <li>Clear documentation: setup steps, runbooks, architecture notes.</li>
+      </ul>
+      <div class="dv-tags">
+        <span class="dv-tag">Secure by Default</span>
+        <span class="dv-tag">Automation First</span>
+        <span class="dv-tag">Clean Git History</span>
+        <span class="dv-tag">Documented</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- SKILLS -->
+<section id="skills" class="sec reveal">
+  <div class="sec-tag">skills</div>
+  <h2 class="sec-title">Technical Skills &amp; Competencies</h2>
+  <p class="sec-sub">DevOps-focused tooling, cloud, and delivery practices.</p>
+  <div class="skills-cols">
+    <div><div class="sg-title">Cloud (AWS)</div><ul class="sg-list"><li>EC2, VPC, IAM</li><li>S3, Security Groups</li><li>NACL, Subnets</li></ul></div>
+    <div><div class="sg-title">Linux &amp; Scripting</div><ul class="sg-list"><li>Linux Administration</li><li>Bash Scripting</li><li>SSH &amp; Shell Automation</li></ul></div>
+    <div><div class="sg-title">CI/CD &amp; Git</div><ul class="sg-list"><li>Git &amp; GitHub</li><li>GitHub Actions</li><li>Build &amp; Deploy Automation</li></ul></div>
+    <div><div class="sg-title">Containers</div><ul class="sg-list"><li>Docker (images, compose)</li><li>Dockerfile best practices</li><li>Container Registry</li></ul></div>
+    <div><div class="sg-title">Networking &amp; Web</div><ul class="sg-list"><li>TCP/IP, DNS</li><li>Nginx Web Server</li><li>Subnets &amp; Routing</li></ul></div>
+    <div><div class="sg-title">Security</div><ul class="sg-list"><li>IAM Policies</li><li>Least-Privilege Access</li><li>Secure Key Handling</li></ul></div>
+  </div>
+</section>
+
+<!-- EDUCATION -->
+<section id="education" class="sec reveal">
+  <div class="sec-tag">education</div>
+  <h2 class="sec-title">Educational Background</h2>
+  <p class="sec-sub">Academic foundation in computer science &amp; engineering.</p>
+  <div class="edu-list">
+    <div class="edu-card"><span class="edu-emoji">🎓</span><div><div class="edu-deg">Bachelor of Technology — Computer Science Engineering</div><div class="edu-sch">University Institute of Technology, RGPV</div><div class="edu-yr">August 2022 – Present</div></div></div>
+    <div class="edu-card"><span class="edu-emoji">📚</span><div><div class="edu-deg">Cloud &amp; DevOps — Self-Directed Learning</div><div class="edu-sch">AWS, Docker, Linux, CI/CD, Networking</div><div class="edu-yr">Ongoing · Hands-on Labs &amp; Projects</div></div></div>
+  </div>
+</section>
+
+<!-- CONTACT -->
+<section id="contact" class="sec reveal">
+  <div class="sec-tag">contact</div>
+  <h2 class="sec-title">Let's Connect</h2>
+  <p class="sec-sub">I'm always interested in new opportunities in DevOps and Cloud Engineering.</p>
+  <div class="ct-grid">
+    <div>
+      <div class="ct-title">Get in Touch</div>
+      <div class="ct-desc">Open to <strong style="color:var(--accent)">DevOps / Cloud / Platform Engineer</strong> roles — internships, entry-level, or remote. Feel free to reach out anytime!</div>
+      <div class="ct-cards">
+        <a href="mailto:neeteshsahu.cloud@gmail.com" class="ct-card"><div class="ct-icon">✉️</div><div><span class="ct-lbl">Email</span><span class="ct-val">neeteshsahu.cloud@gmail.com</span></div></a>
+        <a href="https://github.com/neetesh-sahu" target="_blank" class="ct-card"><div class="ct-icon">⌥</div><div><span class="ct-lbl">GitHub</span><span class="ct-val">@neetesh-sahu</span></div></a>
+        <a href="https://www.linkedin.com/in/neetesh-sahu-9b588520a" target="_blank" class="ct-card"><div class="ct-icon" style="font-size:.72rem;font-weight:700;color:var(--accent)">in</div><div><span class="ct-lbl">LinkedIn</span><span class="ct-val">linkedin.com/in/neetesh-sahu</span></div></a>
+        <div class="ct-card" style="cursor:default"><div class="ct-icon">📍</div><div><span class="ct-lbl">Location</span><span class="ct-val">Indore, MP · Open to Bangalore, Pune, Remote</span></div></div>
+      </div>
+    </div>
+    <div class="ct-form">
+      <div class="form-row2">
+        <input id="f-name" type="text" class="f-in" placeholder="Your Name"/>
+        <input id="f-email" type="email" class="f-in" placeholder="Your Email"/>
+      </div>
+      <input id="f-subject" type="text" class="f-in" placeholder="Subject"/>
+      <textarea id="f-msg" class="f-ta" placeholder="Your message…"></textarea>
+      <button class="btn-p" onclick="sendMail()" style="align-self:flex-start">Get in Touch →</button>
+      <p id="f-status" class="f-status">✓ Gmail is opening — compose window ready!</p>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <p>© 2026 Neetesh Sahu. All rights reserved.</p>
+  <div class="ft-links">
+    <a href="https://github.com/neetesh-sahu" target="_blank">GitHub</a>
+    <a href="https://www.linkedin.com/in/neetesh-sahu-9b588520a" target="_blank">LinkedIn</a>
+    <a href="mailto:neeteshsahu.cloud@gmail.com">Email</a>
+  </div>
+</footer>
+
+<script src="https://platform.linkedin.com/badges/js/profile.js" async defer></script>
+<script>
+/* GitHub Repos */
+async function loadGH() {
+  const grid = document.getElementById('gh-grid');
+  const cnt  = document.getElementById('repo-count');
+  const langColors = {Shell:'#89e051',Python:'#3572A5',JavaScript:'#f1e05a',Dockerfile:'#384d54',HCL:'#844fba',HTML:'#e34c26',YAML:'#cb171e'};
+  try {
+    const res   = await fetch('https://api.github.com/users/neetesh-sahu/repos?sort=updated&per_page=6');
+    const repos = await res.json();
+    if (!Array.isArray(repos) || repos.length === 0) throw new Error();
+    cnt.textContent = repos.length;
+    grid.innerHTML = repos.map(r => `
+      <a href="${r.html_url}" target="_blank" class="repo-card">
+        <div class="repo-top"><span class="repo-ico">📁</span><span class="repo-name">${r.name}</span></div>
+        <p class="repo-desc">${r.description || 'No description provided.'}</p>
+        <div class="repo-foot">
+          ${r.language?`<span class="repo-lang"><span class="lang-dot" style="background:${langColors[r.language]||'#58a6ff'}"></span>${r.language}</span>`:''}
+          <span class="repo-stars">★ ${r.stargazers_count}</span>
+        </div>
+      </a>`).join('');
+  } catch {
+    cnt.textContent = '4+';
+    grid.innerHTML = `
+      <a href="https://github.com/neetesh-sahu" target="_blank" class="repo-card"><div class="repo-top"><span class="repo-ico">📁</span><span class="repo-name">aws-vpc-setup</span></div><p class="repo-desc">Multi-tier VPC with public/private subnets, Internet Gateway, and security groups on AWS.</p><div class="repo-foot"><span class="repo-lang"><span class="lang-dot" style="background:#89e051"></span>Shell</span></div></a>
+      <a href="https://github.com/neetesh-sahu" target="_blank" class="repo-card"><div class="repo-top"><span class="repo-ico">📁</span><span class="repo-name">docker-nginx-deploy</span></div><p class="repo-desc">Dockerized web app with Nginx reverse proxy deployed on Linux server using Docker Compose.</p><div class="repo-foot"><span class="repo-lang"><span class="lang-dot" style="background:#384d54"></span>Dockerfile</span></div></a>
+      <a href="https://github.com/neetesh-sahu" target="_blank" class="repo-card"><div class="repo-top"><span class="repo-ico">📁</span><span class="repo-name">bash-automation</span></div><p class="repo-desc">Bash scripts for Linux admin tasks — user management, disk monitoring, S3 backups, log cleanup.</p><div class="repo-foot"><span class="repo-lang"><span class="lang-dot" style="background:#89e051"></span>Shell</span></div></a>
+      <a href="https://github.com/neetesh-sahu" target="_blank" class="repo-card"><div class="repo-top"><span class="repo-ico">📁</span><span class="repo-name">github-actions-cicd</span></div><p class="repo-desc">CI/CD pipeline using GitHub Actions to auto build and deploy to EC2 on every push to main.</p><div class="repo-foot"><span class="repo-lang"><span class="lang-dot" style="background:#cb171e"></span>YAML</span></div></a>`;
+  }
+}
+loadGH();
+
+/* Send Mail */
+function sendMail() {
+  const name = document.getElementById('f-name').value.trim();
+  const email= document.getElementById('f-email').value.trim();
+  const subj = document.getElementById('f-subject').value.trim() || 'Portfolio Inquiry';
+  const msg  = document.getElementById('f-msg').value.trim();
+  if (!name || !msg) { alert('Please fill in your name and message.'); return; }
+  const body = `Hi Neetesh,\n\n${msg}\n\n---\nFrom: ${name}${email?'\nReply-to: '+email:''}`;
+  window.open(`mailto:neeteshsahu.cloud@gmail.com?subject=${encodeURIComponent(subj)}&body=${encodeURIComponent(body)}`,'_blank');
+  const s = document.getElementById('f-status');
+  s.style.display='block';
+  setTimeout(()=>s.style.display='none',5000);
+}
+
+/* Scroll Reveal */
+const obs = new IntersectionObserver(e=>e.forEach(x=>x.isIntersecting&&x.target.classList.add('vis')),{threshold:.08});
+document.querySelectorAll('.reveal').forEach(el=>obs.observe(el));
+
+/* Active Nav */
+const navAs = document.querySelectorAll('.nav-links a');
+window.addEventListener('scroll',()=>{
+  let cur='';
+  document.querySelectorAll('[id]').forEach(s=>{if(window.scrollY>=s.offsetTop-90)cur=s.id});
+  navAs.forEach(a=>a.classList.toggle('active',a.getAttribute('href')==='#'+cur));
+});
+</script>
 </body>
 </html>
